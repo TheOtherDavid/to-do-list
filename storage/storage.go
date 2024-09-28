@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/TheOtherDavid/to-do-list/models"
 )
@@ -33,7 +34,19 @@ func (s *CSVStorage) CreateTask(task models.Task) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	return writer.Write([]string{task.ID, task.Title, task.Description, fmt.Sprintf("%v", task.Completed)})
+	completedAt := ""
+	if task.CompletedAt != nil {
+		completedAt = task.CompletedAt.Format(time.RFC3339)
+	}
+
+	return writer.Write([]string{
+		task.ID,
+		task.Title,
+		task.Description,
+		fmt.Sprintf("%v", task.Completed),
+		task.CreatedAt.Format(time.RFC3339),
+		completedAt,
+	})
 }
 
 func (s *CSVStorage) ListTasks() ([]models.Task, error) {
