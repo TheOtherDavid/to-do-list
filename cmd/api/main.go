@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	handlers.InitStorage("tasks.csv")
+	handlers.InitStorage("task_instance.csv", "task_template.csv")
 	router := routes.SetupRoutes()
 
 	log.Println("Starting server on :8080")

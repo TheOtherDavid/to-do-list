@@ -10,9 +10,16 @@ func SetupRoutes() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/tasks", handlers.CreateTask).Methods("POST")
-	r.HandleFunc("/tasks", handlers.ListTasks).Methods("GET")
-	r.HandleFunc("/tasks/{id}", handlers.DeleteTask).Methods("DELETE")
+	r.HandleFunc("/tasks", handlers.GetUncompletedTasks).Methods("GET")
+	r.HandleFunc("/tasks/completed", handlers.GetCompletedTasks).Methods("GET")
 	r.HandleFunc("/tasks/{id}/complete", handlers.CompleteTask).Methods("PUT")
+
+	// New task instance routes
+	r.HandleFunc("/task-templates", handlers.CreateTaskTemplate).Methods("POST")
+	r.HandleFunc("/task-templates", handlers.GetAllTaskTemplates).Methods("GET")
+	r.HandleFunc("/task-templates/{id}", handlers.GetTaskTemplate).Methods("GET")
+	r.HandleFunc("/task-templates/{id}", handlers.UpdateTaskTemplate).Methods("PUT")
+	r.HandleFunc("/task-templates/{id}", handlers.DeleteTaskTemplate).Methods("DELETE")
 
 	return r
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,12 +16,12 @@ import (
 
 var csvStorage *storage.CSVStorage
 
-func InitStorage(filename string) {
-	csvStorage = storage.NewCSVStorage(filename)
+func InitStorage(taskInstanceFile, taskTemplateFile string) {
+	csvStorage = storage.NewCSVStorage(taskInstanceFile, taskTemplateFile)
 }
 
 func CreateTask(w http.ResponseWriter, r *http.Request) {
-	var task models.Task
+	var task models.TaskInstance
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -30,7 +31,7 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	task.ID = uuid.New().String()
 	task.CreatedAt = time.Now()
 
-	err = csvStorage.CreateTask(task)
+	err = csvStorage.SaveTaskInstance(task)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -40,8 +41,8 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(task)
 }
 
-func ListTasks(w http.ResponseWriter, r *http.Request) {
-	tasks, err := csvStorage.ListTasks()
+func GetUncompletedTasks(w http.ResponseWriter, r *http.Request) {
+	tasks, err := csvStorage.GetUncompletedTaskInstances()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -50,18 +51,26 @@ func ListTasks(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tasks)
 }
 
-func DeleteTask(w http.ResponseWriter, r *http.Request) {
+func GetCompletedTasks(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
-	log.Printf("Deleting task with ID: %s", id)
+	limit, err := strconv.Atoi(vars["limit"])
+	if err != nil {
+		http.Error(w, "Invalid limit value", http.StatusBadRequest)
+		return
+	}
+	offset, err := strconv.Atoi(vars["offset"])
+	if err != nil {
+		http.Error(w, "Invalid offset value", http.StatusBadRequest)
+		return
+	}
 
-	err := csvStorage.DeleteTask(id)
+	tasks, err := csvStorage.GetCompletedTaskInstances(limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	json.NewEncoder(w).Encode(tasks)
 }
 
 func CompleteTask(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +78,7 @@ func CompleteTask(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 	log.Printf("Completing task with ID: %s", id)
 
-	tasks, err := csvStorage.ListTasks()
+	tasks, err := csvStorage.GetUncompletedTaskInstances()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -91,7 +100,7 @@ func CompleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = csvStorage.UpdateTasks(tasks)
+	err = csvStorage.SetCompleted(id, true)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

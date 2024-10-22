@@ -2,8 +2,9 @@ package models
 
 import "time"
 
-type Task struct {
+type TaskInstance struct {
 	ID          string     `json:"id"`
+	TemplateID  string     `json:"template_id"`
 	Title       string     `json:"title"`
 	Description string     `json:"description"`
 	Completed   bool       `json:"completed"`
