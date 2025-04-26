@@ -14,7 +14,7 @@ import (
 	"github.com/TheOtherDavid/to-do-list/storage"
 )
 
-var csvStorage *storage.CSVStorage
+var csvStorage storage.Storage
 
 func InitStorage(taskInstanceFile, taskTemplateFile string) {
 	csvStorage = storage.NewCSVStorage(taskInstanceFile, taskTemplateFile)
