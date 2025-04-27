@@ -1,8 +1,7 @@
 # To-Do List API
 
 [![Go Tests](https://github.com/TheOtherDavid/to-do-list/actions/workflows/go.yml/badge.svg)](https://github.com/TheOtherDavid/to-do-list/actions/workflows/go.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/TheOtherDavid/to-do-list)](https://goreportcard.com/report/github.com/TheOtherDavid/to-do-list)
-[![codecov](https://codecov.io/gh/TheOtherDavid/to-do-list/branch/main/graph/badge.svg)](https://codecov.io/gh/TheOtherDavid/to-do-list)
+[![codecov](https://codecov.io/gh/TheOtherDavid/to-do-list/graph/badge.svg?token=T8MWLVA0C2)](https://codecov.io/gh/TheOtherDavid/to-do-list)
 
 There are many like it, but this one is mine.
 
