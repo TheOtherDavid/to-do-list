@@ -6,7 +6,7 @@ import (
 
 type Storage interface {
 	SaveTaskInstance(instance models.TaskInstance) error
-	GetLastInstanceForTemplate(templateID string) (models.TaskInstance, error)
+	GetLastInstanceForTemplate(templateID string) (*models.TaskInstance, error)
 	GetUncompletedTaskInstances() ([]models.TaskInstance, error)
 	GetCompletedTaskInstances(limit, offset int) ([]models.TaskInstance, error)
 	SetCompleted(id string, completed bool) error

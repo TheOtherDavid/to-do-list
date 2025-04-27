@@ -10,11 +10,9 @@ type CSVStorage struct {
 	mutex        sync.RWMutex
 }
 
-func NewCSVStorage(templateFile, instanceFile string) *CSVStorage {
+func NewCSVStorage(instanceFile, templateFile string) *CSVStorage {
 	return &CSVStorage{
-		templateFile: templateFile,
 		instanceFile: instanceFile,
+		templateFile: templateFile,
 	}
 }
-
-// Helper methods for reading/writing CSV files

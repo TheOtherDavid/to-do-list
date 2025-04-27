@@ -6,12 +6,22 @@ import (
 
 // MockStorage implements storage.Storage interface
 type MockStorage struct {
+	// Task Instance fields
 	SavedTask        *models.TaskInstance
 	UncompletedTasks []models.TaskInstance
 	CompletedTasks   []models.TaskInstance
 	LastCompletedID  string
+
+	// Task Template fields
+	SavedTemplate       *models.TaskTemplate
+	Templates           []models.TaskTemplate
+	LastUpdatedTemplate *models.TaskTemplate
+	LastDeletedID       string
+
+	// Error fields
 	Err             error
 	SetCompletedErr error
+	TemplateErr     error
 }
 
 func NewMockStorage() *MockStorage {
@@ -27,8 +37,8 @@ func (m *MockStorage) SaveTaskInstance(task models.TaskInstance) error {
 	return nil
 }
 
-func (m *MockStorage) GetLastInstanceForTemplate(templateID string) (models.TaskInstance, error) {
-	return models.TaskInstance{}, nil
+func (m *MockStorage) GetLastInstanceForTemplate(templateID string) (*models.TaskInstance, error) {
+	return nil, m.Err
 }
 
 func (m *MockStorage) GetUncompletedTaskInstances() ([]models.TaskInstance, error) {
@@ -58,21 +68,46 @@ func (m *MockStorage) SetCompleted(id string, completed bool) error {
 
 // Task Template methods
 func (m *MockStorage) SaveTaskTemplate(template models.TaskTemplate) error {
+	if m.TemplateErr != nil {
+		return m.TemplateErr
+	}
+	m.SavedTemplate = &template
 	return nil
 }
 
 func (m *MockStorage) GetAllTaskTemplates() ([]models.TaskTemplate, error) {
-	return nil, nil
+	if m.TemplateErr != nil {
+		return nil, m.TemplateErr
+	}
+	return m.Templates, nil
 }
 
 func (m *MockStorage) GetTaskTemplate(id string) (models.TaskTemplate, error) {
-	return models.TaskTemplate{}, nil
+	if m.TemplateErr != nil {
+		return models.TaskTemplate{}, m.TemplateErr
+	}
+
+	for _, template := range m.Templates {
+		if template.ID == id {
+			return template, nil
+		}
+	}
+
+	return models.TaskTemplate{}, m.TemplateErr
 }
 
 func (m *MockStorage) UpdateTaskTemplate(template models.TaskTemplate) error {
+	if m.TemplateErr != nil {
+		return m.TemplateErr
+	}
+	m.LastUpdatedTemplate = &template
 	return nil
 }
 
 func (m *MockStorage) DeleteTaskTemplate(id string) error {
+	if m.TemplateErr != nil {
+		return m.TemplateErr
+	}
+	m.LastDeletedID = id
 	return nil
 }

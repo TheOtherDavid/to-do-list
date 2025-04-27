@@ -31,29 +31,29 @@ func setupTest(t *testing.T) *testHelper {
 		},
 		recorder: httptest.NewRecorder(),
 	}
-	
+
 	// Save and replace storage
 	th.origStorage = csvStorage
 	csvStorage = th.mockStorage
-	
+
 	t.Cleanup(func() {
 		csvStorage = th.origStorage
 	})
-	
+
 	return th
 }
 
 func (th *testHelper) makeRequest(method, path string, body interface{}) *http.Request {
 	var bodyReader io.Reader
-	
+
 	if body != nil {
 		jsonBytes, err := json.Marshal(body)
 		if err != nil {
-			panic(err) // this would be a test writing error
+			panic(err)
 		}
 		bodyReader = bytes.NewBuffer(jsonBytes)
 	}
-	
+
 	req := httptest.NewRequest(method, path, bodyReader)
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
@@ -64,7 +64,7 @@ func (th *testHelper) makeRequest(method, path string, body interface{}) *http.R
 func TestCreateTask(t *testing.T) {
 	t.Run("success case", func(t *testing.T) {
 		th := setupTest(t)
-		
+
 		task := models.TaskInstance{
 			Title:       "Test Task",
 			Description: "Test Description",
@@ -106,7 +106,7 @@ func TestCreateTask(t *testing.T) {
 
 	t.Run("invalid JSON", func(t *testing.T) {
 		th := setupTest(t)
-		
+
 		invalidJSON := []byte(`{"title": "Test Task", "description": "Test Description"`) // missing closing brace
 		req := httptest.NewRequest(http.MethodPost, "/tasks", bytes.NewBuffer(invalidJSON))
 		req.Header.Set("Content-Type", "application/json")
@@ -142,7 +142,7 @@ func TestCreateTask(t *testing.T) {
 func TestGetUncompletedTasks(t *testing.T) {
 	t.Run("success case", func(t *testing.T) {
 		th := setupTest(t)
-		
+
 		// Setup mock data
 		expectedTasks := []models.TaskInstance{
 			{
@@ -203,7 +203,7 @@ func TestGetUncompletedTasks(t *testing.T) {
 func TestGetCompletedTasks(t *testing.T) {
 	t.Run("success case", func(t *testing.T) {
 		th := setupTest(t)
-		
+
 		// Setup mock data
 		expectedTasks := []models.TaskInstance{
 			{
@@ -307,7 +307,7 @@ func TestGetCompletedTasks(t *testing.T) {
 func TestCompleteTask(t *testing.T) {
 	t.Run("success case", func(t *testing.T) {
 		th := setupTest(t)
-		
+
 		// Setup mock data
 		taskID := "test-task-id"
 		uncompletedTasks := []models.TaskInstance{
@@ -339,7 +339,7 @@ func TestCompleteTask(t *testing.T) {
 
 	t.Run("task not found", func(t *testing.T) {
 		th := setupTest(t)
-		
+
 		// Setup mock data with no tasks
 		th.mockStorage.UncompletedTasks = []models.TaskInstance{}
 
@@ -373,7 +373,7 @@ func TestCompleteTask(t *testing.T) {
 
 	t.Run("set completed error", func(t *testing.T) {
 		th := setupTest(t)
-		
+
 		// Setup mock data
 		taskID := "test-task-id"
 		uncompletedTasks := []models.TaskInstance{
@@ -385,7 +385,7 @@ func TestCompleteTask(t *testing.T) {
 			},
 		}
 		th.mockStorage.UncompletedTasks = uncompletedTasks
-		
+
 		// Set error for SetCompleted operation
 		th.mockStorage.SetCompletedErr = errors.New("failed to set completed")
 

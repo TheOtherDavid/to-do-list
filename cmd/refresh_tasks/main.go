@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	jobs.InitStorage("task_instance.csv", "task_template.csv")
+	jobs.InitStorage("../../task_instance.csv", "../../task_template.csv")
 	err := jobs.RefreshTasks()
 	if err != nil {
 		log.Fatal(err)

@@ -15,7 +15,6 @@ func (s *CSVStorage) SaveTaskInstance(instance models.TaskInstance) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	// Create the file with secure permissions (0600)
 	file, err := os.OpenFile(s.instanceFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
@@ -48,13 +47,13 @@ func (s *CSVStorage) SaveTaskInstance(instance models.TaskInstance) error {
 		return fmt.Errorf("failed to write record: %w", err)
 	}
 
-	return err // This will include any close error from the deferred function
+	return err
 }
 
-func (s *CSVStorage) GetLastInstanceForTemplate(templateID string) (models.TaskInstance, error) {
+func (s *CSVStorage) GetLastInstanceForTemplate(templateID string) (*models.TaskInstance, error) {
 	instances, err := s.getAllTaskInstances()
 	if err != nil {
-		return models.TaskInstance{}, fmt.Errorf("failed to get all task instances: %w", err)
+		return nil, fmt.Errorf("failed to get all task instances: %w", err)
 	}
 
 	var lastInstance models.TaskInstance
@@ -67,10 +66,10 @@ func (s *CSVStorage) GetLastInstanceForTemplate(templateID string) (models.TaskI
 	}
 
 	if lastInstance.ID == "" {
-		return models.TaskInstance{}, fmt.Errorf("no instances found for template ID: %s", templateID)
+		return nil, nil
 	}
 
-	return lastInstance, nil
+	return &lastInstance, nil
 }
 
 func (s *CSVStorage) GetUncompletedTaskInstances() ([]models.TaskInstance, error) {
@@ -102,7 +101,6 @@ func (s *CSVStorage) GetCompletedTaskInstances(limit, offset int) ([]models.Task
 		}
 	}
 
-	// Sort completed instances by CompletedAt in descending order
 	sort.Slice(completedInstances, func(i, j int) bool {
 		return completedInstances[i].CompletedAt.After(*completedInstances[j].CompletedAt)
 	})
@@ -194,7 +192,6 @@ func (s *CSVStorage) SetCompleted(id string, completed bool) error {
 		return fmt.Errorf("task instance with ID %s not found", id)
 	}
 
-	// Create the file with secure permissions (0600)
 	file, err := os.Create(s.instanceFile)
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
@@ -229,5 +226,5 @@ func (s *CSVStorage) SetCompleted(id string, completed bool) error {
 		}
 	}
 
-	return err // This will include any close error from the deferred function
+	return err
 }
