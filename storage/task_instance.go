@@ -15,11 +15,16 @@ func (s *CSVStorage) SaveTaskInstance(instance models.TaskInstance) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	file, err := os.OpenFile(s.instanceFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	// Create the file with secure permissions (0600)
+	file, err := os.OpenFile(s.instanceFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
@@ -29,7 +34,7 @@ func (s *CSVStorage) SaveTaskInstance(instance models.TaskInstance) error {
 		completedAt = instance.CompletedAt.Format(time.RFC3339)
 	}
 
-	return writer.Write([]string{
+	record := []string{
 		instance.ID,
 		instance.TemplateID,
 		instance.Title,
@@ -37,13 +42,19 @@ func (s *CSVStorage) SaveTaskInstance(instance models.TaskInstance) error {
 		strconv.FormatBool(instance.Completed),
 		instance.CreatedAt.Format(time.RFC3339),
 		completedAt,
-	})
+	}
+
+	if err := writer.Write(record); err != nil {
+		return fmt.Errorf("failed to write record: %w", err)
+	}
+
+	return err // This will include any close error from the deferred function
 }
 
 func (s *CSVStorage) GetLastInstanceForTemplate(templateID string) (models.TaskInstance, error) {
 	instances, err := s.getAllTaskInstances()
 	if err != nil {
-		return models.TaskInstance{}, err
+		return models.TaskInstance{}, fmt.Errorf("failed to get all task instances: %w", err)
 	}
 
 	var lastInstance models.TaskInstance
@@ -65,7 +76,7 @@ func (s *CSVStorage) GetLastInstanceForTemplate(templateID string) (models.TaskI
 func (s *CSVStorage) GetUncompletedTaskInstances() ([]models.TaskInstance, error) {
 	instances, err := s.getAllTaskInstances()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get all task instances: %w", err)
 	}
 
 	var uncompletedInstances []models.TaskInstance
@@ -81,7 +92,7 @@ func (s *CSVStorage) GetUncompletedTaskInstances() ([]models.TaskInstance, error
 func (s *CSVStorage) GetCompletedTaskInstances(limit, offset int) ([]models.TaskInstance, error) {
 	instances, err := s.getAllTaskInstances()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get all task instances: %w", err)
 	}
 
 	var completedInstances []models.TaskInstance
@@ -115,14 +126,18 @@ func (s *CSVStorage) getAllTaskInstances() ([]models.TaskInstance, error) {
 
 	file, err := os.Open(s.instanceFile)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read records: %w", err)
 	}
 
 	var instances []models.TaskInstance
@@ -157,7 +172,7 @@ func (s *CSVStorage) SetCompleted(id string, completed bool) error {
 
 	instances, err := s.getAllTaskInstances()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get all task instances: %w", err)
 	}
 
 	found := false
@@ -179,12 +194,16 @@ func (s *CSVStorage) SetCompleted(id string, completed bool) error {
 		return fmt.Errorf("task instance with ID %s not found", id)
 	}
 
-	// Rewrite the entire file with the updated data
+	// Create the file with secure permissions (0600)
 	file, err := os.Create(s.instanceFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
@@ -195,7 +214,7 @@ func (s *CSVStorage) SetCompleted(id string, completed bool) error {
 			completedAt = instance.CompletedAt.Format(time.RFC3339)
 		}
 
-		err := writer.Write([]string{
+		record := []string{
 			instance.ID,
 			instance.TemplateID,
 			instance.Title,
@@ -203,11 +222,12 @@ func (s *CSVStorage) SetCompleted(id string, completed bool) error {
 			strconv.FormatBool(instance.Completed),
 			instance.CreatedAt.Format(time.RFC3339),
 			completedAt,
-		})
-		if err != nil {
-			return err
+		}
+
+		if err := writer.Write(record); err != nil {
+			return fmt.Errorf("failed to write record: %w", err)
 		}
 	}
 
-	return nil
+	return err // This will include any close error from the deferred function
 }

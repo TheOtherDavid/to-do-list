@@ -13,45 +13,59 @@ func (s *CSVStorage) SaveTaskTemplate(template models.TaskTemplate) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	file, err := os.OpenFile(s.templateFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	file, err := os.OpenFile(s.templateFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	return writer.Write([]string{
+	record := []string{
 		template.ID,
 		template.Title,
 		template.Description,
 		template.RecurrenceRule,
 		template.CreatedAt.Format(time.RFC3339),
-	})
+	}
+
+	if err := writer.Write(record); err != nil {
+		return fmt.Errorf("failed to write record: %w", err)
+	}
+
+	return nil
 }
 
 func (s *CSVStorage) GetAllTaskTemplates() ([]models.TaskTemplate, error) {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
 	file, err := os.Open(s.templateFile)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read records: %w", err)
 	}
 
-	var templates []models.TaskTemplate
+	templates := make([]models.TaskTemplate, 0, len(records))
 	for _, record := range records {
 		createdAt, err := time.Parse(time.RFC3339, record[4])
 		if err != nil {
-			return nil, fmt.Errorf("error parsing CreatedAt time for template %s: %v", record[0], err)
+			return nil, fmt.Errorf("failed to parse created at: %w", err)
 		}
 
 		template := models.TaskTemplate{
@@ -68,63 +82,99 @@ func (s *CSVStorage) GetAllTaskTemplates() ([]models.TaskTemplate, error) {
 }
 
 func (s *CSVStorage) GetTaskTemplate(id string) (models.TaskTemplate, error) {
-	templates, err := s.GetAllTaskTemplates()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	file, err := os.Open(s.templateFile)
 	if err != nil {
-		return models.TaskTemplate{}, err
+		return models.TaskTemplate{}, fmt.Errorf("failed to open file: %w", err)
+	}
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return models.TaskTemplate{}, fmt.Errorf("failed to read records: %w", err)
 	}
 
-	for _, template := range templates {
-		if template.ID == id {
-			return template, nil
+	for _, record := range records {
+		if record[0] == id {
+			createdAt, err := time.Parse(time.RFC3339, record[4])
+			if err != nil {
+				return models.TaskTemplate{}, fmt.Errorf("failed to parse created at: %w", err)
+			}
+
+			return models.TaskTemplate{
+				ID:             record[0],
+				Title:          record[1],
+				Description:    record[2],
+				RecurrenceRule: record[3],
+				CreatedAt:      createdAt,
+			}, nil
 		}
 	}
 
-	return models.TaskTemplate{}, fmt.Errorf("task template with ID %s not found", id)
+	return models.TaskTemplate{}, fmt.Errorf("template with ID %s not found", id)
 }
 
 func (s *CSVStorage) UpdateTaskTemplate(template models.TaskTemplate) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	templates, err := s.GetAllTaskTemplates()
+	file, err := os.Open(s.templateFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return fmt.Errorf("failed to read records: %w", err)
 	}
 
 	found := false
-	for i, t := range templates {
-		if t.ID == template.ID {
-			templates[i] = template
+	for i, record := range records {
+		if record[0] == template.ID {
 			found = true
+			records[i] = []string{
+				template.ID,
+				template.Title,
+				template.Description,
+				template.RecurrenceRule,
+				template.CreatedAt.Format(time.RFC3339),
+			}
 			break
 		}
 	}
 
 	if !found {
-		return fmt.Errorf("task template with ID %s not found", template.ID)
+		return fmt.Errorf("template with ID %s not found", template.ID)
 	}
 
-	// Rewrite the entire file with the updated data
-	file, err := os.Create(s.templateFile)
+	file, err = os.OpenFile(s.templateFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file for writing: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	for _, t := range templates {
-		err := writer.Write([]string{
-			t.ID,
-			t.Title,
-			t.Description,
-			t.RecurrenceRule,
-			t.CreatedAt.Format(time.RFC3339),
-		})
-		if err != nil {
-			return err
-		}
+	if err := writer.WriteAll(records); err != nil {
+		return fmt.Errorf("failed to write records: %w", err)
 	}
 
 	return nil
@@ -134,46 +184,51 @@ func (s *CSVStorage) DeleteTaskTemplate(id string) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	templates, err := s.GetAllTaskTemplates()
+	file, err := os.Open(s.templateFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return fmt.Errorf("failed to read records: %w", err)
 	}
 
 	found := false
-	var updatedTemplates []models.TaskTemplate
-	for _, t := range templates {
-		if t.ID != id {
-			updatedTemplates = append(updatedTemplates, t)
+	var updatedRecords [][]string
+	for _, record := range records {
+		if record[0] != id {
+			updatedRecords = append(updatedRecords, record)
 		} else {
 			found = true
 		}
 	}
 
 	if !found {
-		return fmt.Errorf("task template with ID %s not found", id)
+		return fmt.Errorf("template with ID %s not found", id)
 	}
 
-	// Rewrite the entire file with the updated data
-	file, err := os.Create(s.templateFile)
+	file, err = os.OpenFile(s.templateFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file for writing: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	for _, t := range updatedTemplates {
-		err := writer.Write([]string{
-			t.ID,
-			t.Title,
-			t.Description,
-			t.RecurrenceRule,
-			t.CreatedAt.Format(time.RFC3339),
-		})
-		if err != nil {
-			return err
-		}
+	if err := writer.WriteAll(updatedRecords); err != nil {
+		return fmt.Errorf("failed to write records: %w", err)
 	}
 
 	return nil

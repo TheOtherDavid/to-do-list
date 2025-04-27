@@ -27,7 +27,10 @@ func CreateTaskTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(template)
+	if err := json.NewEncoder(w).Encode(template); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func GetAllTaskTemplates(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +40,10 @@ func GetAllTaskTemplates(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(templates)
+	if err := json.NewEncoder(w).Encode(templates); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func GetTaskTemplate(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +54,10 @@ func GetTaskTemplate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(template)
+	if err := json.NewEncoder(w).Encode(template); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func UpdateTaskTemplate(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +75,10 @@ func UpdateTaskTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(template)
+	if err := json.NewEncoder(w).Encode(template); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func DeleteTaskTemplate(w http.ResponseWriter, r *http.Request) {

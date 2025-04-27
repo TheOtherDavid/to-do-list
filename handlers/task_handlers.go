@@ -38,7 +38,10 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(task)
+	if err := json.NewEncoder(w).Encode(task); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func GetUncompletedTasks(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +51,10 @@ func GetUncompletedTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(tasks)
+	if err := json.NewEncoder(w).Encode(tasks); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func GetCompletedTasks(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +76,10 @@ func GetCompletedTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(tasks)
+	if err := json.NewEncoder(w).Encode(tasks); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func CompleteTask(w http.ResponseWriter, r *http.Request) {
@@ -108,5 +117,8 @@ func CompleteTask(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Task %s completed successfully", id)
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Task completed successfully"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "Task completed successfully"}); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
