@@ -10,14 +10,14 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/api"
+            "program": "${workspaceFolder}/backend/cmd/api"
         },
         {
             "name": "Run Refresh Tasks Job",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/refresh_tasks"
+            "program": "${workspaceFolder}/backend/cmd/refresh_tasks"
         }
     ]
 }

@@ -1,10 +1,51 @@
 repos:
-- repo: https://github.com/dnephin/pre-commit-golang
-  rev: v0.5.1
+- repo: local
   hooks:
     - id: go-fmt
+      name: go fmt
+      description: Run go fmt on files included in the commit
+      entry: python
+      args: [-c, "import os, subprocess; os.chdir('backend'); subprocess.run(['go', 'fmt', './...'], check=True)"]
+      language: python
+      files: ^backend/.*\.go$
+      pass_filenames: false
     - id: go-vet
+      name: go vet
+      description: Run go vet on files included in the commit
+      entry: python
+      args: [-c, "import os, subprocess; os.chdir('backend'); subprocess.run(['go', 'vet', './...'], check=True)"]
+      language: python
+      files: ^backend/.*\.go$
+      pass_filenames: false
     - id: go-imports
+      name: goimports
+      description: Run goimports on files included in the commit
+      entry: python
+      args: [-c, "import os, subprocess; os.chdir('backend'); subprocess.run(['goimports', '-w', '.'], check=True)"]
+      language: python
+      files: ^backend/.*\.go$
+      pass_filenames: false
     - id: golangci-lint
+      name: golangci-lint
+      description: Run golangci-lint on files included in the commit
+      entry: python
+      args: [-c, "import os, subprocess; os.chdir('backend'); subprocess.run(['golangci-lint', 'run'], check=True)"]
+      language: python
+      files: ^backend/.*\.go$
+      pass_filenames: false
     - id: go-unit-tests
+      name: go test
+      description: Run go test on files included in the commit
+      entry: python
+      args: [-c, "import os, subprocess; os.chdir('backend'); subprocess.run(['go', 'test', '-v', './...'], check=True)"]
+      language: python
+      files: ^backend/.*\.go$
+      pass_filenames: false
     - id: go-mod-tidy
+      name: go mod tidy
+      description: Run go mod tidy to clean up the go.mod and go.sum files
+      entry: python
+      args: [-c, "import os, subprocess; os.chdir('backend'); subprocess.run(['go', 'mod', 'tidy'], check=True)"]
+      language: python
+      files: ^backend/go\.mod$
+      pass_filenames: false

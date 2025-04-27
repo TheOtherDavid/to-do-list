@@ -303,15 +303,15 @@ func TestUpdateTaskTemplate(t *testing.T) {
 			t.Fatal("Expected template to be updated in storage")
 		}
 		if th.mockStorage.LastUpdatedTemplate.Title != updatedTemplate.Title {
-			t.Errorf("Updated template title doesn't match: expected %v, got %v", 
+			t.Errorf("Updated template title doesn't match: expected %v, got %v",
 				updatedTemplate.Title, th.mockStorage.LastUpdatedTemplate.Title)
 		}
 		if th.mockStorage.LastUpdatedTemplate.Description != updatedTemplate.Description {
-			t.Errorf("Updated template description doesn't match: expected %v, got %v", 
+			t.Errorf("Updated template description doesn't match: expected %v, got %v",
 				updatedTemplate.Description, th.mockStorage.LastUpdatedTemplate.Description)
 		}
 		if th.mockStorage.LastUpdatedTemplate.RecurrenceRule != updatedTemplate.RecurrenceRule {
-			t.Errorf("Updated template recurrence rule doesn't match: expected %v, got %v", 
+			t.Errorf("Updated template recurrence rule doesn't match: expected %v, got %v",
 				updatedTemplate.RecurrenceRule, th.mockStorage.LastUpdatedTemplate.RecurrenceRule)
 		}
 	})

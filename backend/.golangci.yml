@@ -1,4 +1,11 @@
 version: "2"
+
+run:
+  go: '1.21'
+  timeout: 5m
+  modules-download-mode: readonly
+  allow-parallel-runners: true
+
 linters:
   enable:
     - errcheck

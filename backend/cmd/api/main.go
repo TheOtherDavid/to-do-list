@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	handlers.InitStorage("task_instance.csv", "task_template.csv")
+	handlers.InitStorage("../../task_instance.csv", "../../task_template.csv")
 	router := routes.SetupRoutes()
 
 	srv := &http.Server{
