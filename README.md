@@ -4,62 +4,71 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/TheOtherDavid/to-do-list)](https://goreportcard.com/report/github.com/TheOtherDavid/to-do-list)
 [![codecov](https://codecov.io/gh/TheOtherDavid/to-do-list/branch/main/graph/badge.svg)](https://codecov.io/gh/TheOtherDavid/to-do-list)
 
-> There are many like it, but this one is mine.
+There are many like it, but this one is mine.
 
-A task management API built with Go. Tracks tasks, and also has support for recurring tasks (called TaskTemplates). Uses CSV files for storage because we're doing it quick & dirty.
+A task management API built with Go. Features task creation, completion tracking, and support for recurring tasks through templates. Uses CSV file storage for simplicity.
 
-## What's Cool About It
+## Features
 
-- ✨ Create and track your tasks
-- 📋 Task templates for recurring tasks
-- 🔄 Auto-refreshes tasks from templates
-- 📊 Keeps track of what's done and what's not
-- 💾 Saves everything to CSV files
-- 🧪 Well-tested
+- Task creation and management
+- Recurring task templates
+- Automatic task generation from templates
+- Task completion tracking
+- CSV-based persistence
+- Comprehensive test coverage
 
-## What's Inside
+## Project Structure
 
 ```
 .
 ├── cmd/
-│   ├── api/          # The main server
-│   └── refresh_tasks/ # Auto-task creator
-├── handlers/         # Handles web stuff
-├── jobs/            # Background tasks
-├── models/          # Data structures
-├── routes/          # API endpoints
-└── storage/         # Saves your stuff
-    └── mocks/       # Test helpers
+│   ├── api/          # Main server application
+│   └── refresh_tasks/ # Task generation service
+├── handlers/         # HTTP request handlers
+├── jobs/            # Background task processors
+├── models/          # Data models
+├── routes/          # API route definitions
+└── storage/         # Data persistence layer
+    └── mocks/       # Test mocks
 ```
 
-## API Stuff You Can Do
+## API Endpoints
 
-- `POST /tasks` - Make a new task
-- `GET /tasks/uncompleted` - See what's not done
-- `GET /tasks/completed` - Check out finished tasks
-- `POST /tasks/{id}/complete` - Mark something as done ✅
+### Tasks
+- `POST /tasks` - Create a new task
+- `GET /tasks/uncompleted` - Retrieve uncompleted tasks
+- `GET /tasks/completed` - Retrieve completed tasks
+- `POST /tasks/{id}/complete` - Mark a task as completed
 
-## Getting Started
+### Task Templates
+- `POST /templates` - Create a task template
+- `GET /templates` - Retrieve all task templates
+- `GET /templates/{id}` - Retrieve a specific template
+- `PUT /templates/{id}` - Update a template
+- `DELETE /templates/{id}` - Delete a template
 
-1. Make sure you have Go 1.21+ installed
+## Installation
 
-2. Grab the code:
+1. Prerequisites:
+   - Go 1.21 or higher
+
+2. Clone the repository:
    ```bash
    git clone https://github.com/TheOtherDavid/to-do-list.git
    cd to-do-list
    ```
 
-3. Get the dependencies:
+3. Install dependencies:
    ```bash
    go mod download
    ```
 
-4. Fire it up:
+4. Build and run:
    ```bash
    go run cmd/api/main.go
    ```
 
-It'll be running at `http://localhost:8080`. Have fun! 🚀
+The server will start on `http://localhost:8080`.
 
 ## Task Refresh From Templates
 
@@ -69,8 +78,8 @@ There's a utility that creates new tasks from your templates:
 go run cmd/refresh_tasks/main.go
 ```
 
-You can set it up with cron if you want it to run automatically. ⏰
+You can set it up with cron if you want it to run automatically.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. MIT Licensed - do whatever you want with it! 🎉
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. MIT Licensed - do whatever you want with it!
