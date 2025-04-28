@@ -15,12 +15,12 @@ func main() {
 
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         ":8080",
+		Addr:         "0.0.0.0:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
 
-	log.Printf("Server starting on http://localhost%s", srv.Addr)
+	log.Printf("Server starting on http://0.0.0.0%s", srv.Addr)
 	log.Fatal(srv.ListenAndServe())
 }
