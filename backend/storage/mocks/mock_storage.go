@@ -12,6 +12,7 @@ type MockStorage struct {
 	CompletedTasks          []models.TaskInstance
 	LastCompletedID         string
 	LastInstanceForTemplate *models.TaskInstance
+	AllTaskInstances        []models.TaskInstance
 
 	// Task Template fields
 	SavedTemplate       *models.TaskTemplate
@@ -52,6 +53,13 @@ func (m *MockStorage) GetLastInstanceForTemplate(templateID string) (*models.Tas
 		return nil, m.Err
 	}
 	return m.LastInstanceForTemplate, nil
+}
+
+func (m *MockStorage) GetAllTaskInstances() ([]models.TaskInstance, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.AllTaskInstances, nil
 }
 
 func (m *MockStorage) GetUncompletedTaskInstances() ([]models.TaskInstance, error) {

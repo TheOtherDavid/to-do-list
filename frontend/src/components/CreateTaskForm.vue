@@ -13,16 +13,6 @@
         />
       </div>
       
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea 
-          id="description" 
-          v-model="taskData.description" 
-          placeholder="Enter task description"
-          rows="3"
-        ></textarea>
-      </div>
-      
       <button 
         type="submit" 
         :disabled="isSubmitting"
@@ -78,15 +68,13 @@ async function submitForm() {
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #444;
-
   width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
+  min-width: 300px;
   box-sizing: border-box;
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 label {
@@ -99,13 +87,18 @@ label {
 input,
 textarea {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.75rem;
   border: 1px solid #555;
   border-radius: 4px;
   font-size: 1rem;
   background-color: #444;
   color: #fff;
   box-sizing: border-box;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
 }
 
 button {

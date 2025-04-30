@@ -14,7 +14,7 @@ func SetupRoutes() *mux.Router {
 	r.Use(corsMiddleware)
 
 	r.HandleFunc("/tasks", handlers.CreateTask).Methods("POST", "OPTIONS")
-	r.HandleFunc("/tasks", handlers.GetUncompletedTasks).Methods("GET")
+	r.HandleFunc("/tasks", handlers.GetAllTasks).Methods("GET")
 	r.HandleFunc("/tasks/completed", handlers.GetCompletedTasks).Methods("GET")
 	r.HandleFunc("/tasks/{id}/complete", handlers.CompleteTask).Methods("PUT", "OPTIONS")
 

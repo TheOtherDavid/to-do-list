@@ -51,7 +51,7 @@ func (s *CSVStorage) SaveTaskInstance(instance models.TaskInstance) error {
 }
 
 func (s *CSVStorage) GetLastInstanceForTemplate(templateID string) (*models.TaskInstance, error) {
-	instances, err := s.getAllTaskInstances()
+	instances, err := s.GetAllTaskInstances()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all task instances: %w", err)
 	}
@@ -73,7 +73,7 @@ func (s *CSVStorage) GetLastInstanceForTemplate(templateID string) (*models.Task
 }
 
 func (s *CSVStorage) GetUncompletedTaskInstances() ([]models.TaskInstance, error) {
-	instances, err := s.getAllTaskInstances()
+	instances, err := s.GetAllTaskInstances()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all task instances: %w", err)
 	}
@@ -89,7 +89,7 @@ func (s *CSVStorage) GetUncompletedTaskInstances() ([]models.TaskInstance, error
 }
 
 func (s *CSVStorage) GetCompletedTaskInstances(limit, offset int) ([]models.TaskInstance, error) {
-	instances, err := s.getAllTaskInstances()
+	instances, err := s.GetAllTaskInstances()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all task instances: %w", err)
 	}
@@ -118,7 +118,7 @@ func (s *CSVStorage) GetCompletedTaskInstances(limit, offset int) ([]models.Task
 	return completedInstances[start:end], nil
 }
 
-func (s *CSVStorage) getAllTaskInstances() ([]models.TaskInstance, error) {
+func (s *CSVStorage) GetAllTaskInstances() ([]models.TaskInstance, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
@@ -165,7 +165,7 @@ func (s *CSVStorage) getAllTaskInstances() ([]models.TaskInstance, error) {
 }
 
 func (s *CSVStorage) SetCompleted(id string, completed bool) error {
-	instances, err := s.getAllTaskInstances()
+	instances, err := s.GetAllTaskInstances()
 	if err != nil {
 		return fmt.Errorf("failed to get all task instances: %w", err)
 	}

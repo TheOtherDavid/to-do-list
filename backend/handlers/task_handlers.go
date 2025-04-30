@@ -48,6 +48,19 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func GetAllTasks(w http.ResponseWriter, r *http.Request) {
+	tasks, err := csvStorage.GetAllTaskInstances()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(tasks); err != nil {
+		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func GetUncompletedTasks(w http.ResponseWriter, r *http.Request) {
 	tasks, err := csvStorage.GetUncompletedTaskInstances()
 	if err != nil {

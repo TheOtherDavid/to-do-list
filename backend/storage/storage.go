@@ -10,6 +10,7 @@ type Storage interface {
 	GetUncompletedTaskInstances() ([]models.TaskInstance, error)
 	GetCompletedTaskInstances(limit, offset int) ([]models.TaskInstance, error)
 	SetCompleted(id string, completed bool) error
+	GetAllTaskInstances() ([]models.TaskInstance, error)
 
 	SaveTaskTemplate(template models.TaskTemplate) error
 	GetAllTaskTemplates() ([]models.TaskTemplate, error)
