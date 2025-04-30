@@ -139,6 +139,67 @@ func TestCreateTask(t *testing.T) {
 	})
 }
 
+func TestGetAllTasks(t *testing.T) {
+	t.Run("success case", func(t *testing.T) {
+		th := setupTest(t)
+
+		// Setup mock data
+		expectedTasks := []models.TaskInstance{
+			{
+				ID:          "1",
+				Title:       "Task 1",
+				Description: "Description 1",
+				CreatedAt:   time.Now(),
+			},
+			{
+				ID:          "2",
+				Title:       "Task 2",
+				Description: "Description 2",
+				CreatedAt:   time.Now(),
+			},
+		}
+		th.mockStorage.AllTaskInstances = expectedTasks
+
+		// Make request
+		GetAllTasks(th.recorder, th.makeRequest(http.MethodGet, "/tasks", nil))
+
+		// Check status code
+		if status := th.recorder.Code; status != http.StatusOK {
+			t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+		}
+
+		// Check response body
+		var responseTasks []models.TaskInstance
+		if err := json.NewDecoder(th.recorder.Body).Decode(&responseTasks); err != nil {
+			t.Fatalf("Failed to decode response: %v", err)
+		}
+
+		if len(responseTasks) != len(expectedTasks) {
+			t.Errorf("Expected %d tasks, got %d", len(expectedTasks), len(responseTasks))
+		}
+
+		for i, task := range expectedTasks {
+			if responseTasks[i].ID != task.ID {
+				t.Errorf("Task %d: expected ID %s, got %s", i, task.ID, responseTasks[i].ID)
+			}
+			if responseTasks[i].Title != task.Title {
+				t.Errorf("Task %d: expected title %s, got %s", i, task.Title, responseTasks[i].Title)
+			}
+		}
+	})
+
+	t.Run("storage error", func(t *testing.T) {
+		th := setupTest(t)
+		th.mockStorage.Err = errors.New("storage error")
+
+		GetAllTasks(th.recorder, th.makeRequest(http.MethodGet, "/tasks", nil))
+
+		if status := th.recorder.Code; status != http.StatusInternalServerError {
+			t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusInternalServerError)
+		}
+	})
+}
+
 func TestGetUncompletedTasks(t *testing.T) {
 	t.Run("success case", func(t *testing.T) {
 		th := setupTest(t)
