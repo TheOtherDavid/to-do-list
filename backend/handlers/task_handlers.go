@@ -20,6 +20,10 @@ func InitStorage(taskInstanceFile, taskTemplateFile string) {
 	csvStorage = storage.NewCSVStorage(taskInstanceFile, taskTemplateFile)
 }
 
+func SetStorage(s storage.Storage) {
+	csvStorage = s
+}
+
 func CreateTask(w http.ResponseWriter, r *http.Request) {
 	var task models.TaskInstance
 	err := json.NewDecoder(r.Body).Decode(&task)
@@ -94,11 +98,8 @@ func CompleteTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	taskFound := false
-	for i, task := range tasks {
+	for _, task := range tasks {
 		if task.ID == id {
-			tasks[i].Completed = true
-			now := time.Now()
-			tasks[i].CompletedAt = &now
 			taskFound = true
 			break
 		}

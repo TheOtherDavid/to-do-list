@@ -18,6 +18,18 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/backend/cmd/refresh_tasks"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Frontend: npm run dev",
+            "cwd": "${workspaceFolder}/frontend",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+              "run",
+              "dev"
+            ],
+            "console": "integratedTerminal"
         }
     ]
 }

@@ -165,17 +165,14 @@ func (s *CSVStorage) getAllTaskInstances() ([]models.TaskInstance, error) {
 }
 
 func (s *CSVStorage) SetCompleted(id string, completed bool) error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
 	instances, err := s.getAllTaskInstances()
 	if err != nil {
 		return fmt.Errorf("failed to get all task instances: %w", err)
 	}
 
 	found := false
-	for i, instance := range instances {
-		if instance.ID == id {
+	for i := range instances {
+		if instances[i].ID == id {
 			instances[i].Completed = completed
 			if completed {
 				now := time.Now()
@@ -191,6 +188,9 @@ func (s *CSVStorage) SetCompleted(id string, completed bool) error {
 	if !found {
 		return fmt.Errorf("task instance with ID %s not found", id)
 	}
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
 	file, err := os.Create(s.instanceFile)
 	if err != nil {
