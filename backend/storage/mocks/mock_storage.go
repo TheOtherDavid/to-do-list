@@ -7,10 +7,11 @@ import (
 // MockStorage implements storage.Storage interface
 type MockStorage struct {
 	// Task Instance fields
-	SavedTask        *models.TaskInstance
-	UncompletedTasks []models.TaskInstance
-	CompletedTasks   []models.TaskInstance
-	LastCompletedID  string
+	SavedTask               *models.TaskInstance
+	UncompletedTasks        []models.TaskInstance
+	CompletedTasks          []models.TaskInstance
+	LastCompletedID         string
+	LastInstanceForTemplate *models.TaskInstance
 
 	// Task Template fields
 	SavedTemplate       *models.TaskTemplate
@@ -22,6 +23,9 @@ type MockStorage struct {
 	Err             error
 	SetCompletedErr error
 	TemplateErr     error
+
+	// Custom function fields for advanced mocking
+	GetLastInstanceForTemplateFunc func(templateID string) (*models.TaskInstance, error)
 }
 
 func NewMockStorage() *MockStorage {
@@ -38,7 +42,16 @@ func (m *MockStorage) SaveTaskInstance(task models.TaskInstance) error {
 }
 
 func (m *MockStorage) GetLastInstanceForTemplate(templateID string) (*models.TaskInstance, error) {
-	return nil, m.Err
+	// If a custom function is provided, use it
+	if m.GetLastInstanceForTemplateFunc != nil {
+		return m.GetLastInstanceForTemplateFunc(templateID)
+	}
+
+	// Otherwise, return the default mock value
+	if m.Err != nil {
+		return nil, m.Err
+	}
+	return m.LastInstanceForTemplate, nil
 }
 
 func (m *MockStorage) GetUncompletedTaskInstances() ([]models.TaskInstance, error) {

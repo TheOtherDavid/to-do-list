@@ -9,10 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
-var csvStorage *storage.CSVStorage
+var csvStorage storage.Storage
 
 func InitStorage(taskInstanceFile, taskTemplateFile string) {
 	csvStorage = storage.NewCSVStorage(taskInstanceFile, taskTemplateFile)
+}
+
+// SetStorage allows injecting a custom storage implementation (useful for testing)
+func SetStorage(s storage.Storage) {
+	csvStorage = s
 }
 
 func RefreshTasks() error {
