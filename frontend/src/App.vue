@@ -1,7 +1,7 @@
 <template>
-  <TaskInstancesPage />
+  <ToDoListPage />
 </template>
 
 <script setup lang="ts">
-import TaskInstancesPage from '@/pages/TaskInstancesPage.vue';
+import ToDoListPage from '@/pages/ToDoListPage.vue';
 </script>

@@ -45,7 +45,6 @@ const props = defineProps<{
   tasks: TaskInstance[];
 }>();
 
-// Format date for better display
 function formatDate(dateString: string) {
   if (!dateString) return '-';
   return new Date(dateString).toLocaleString();
